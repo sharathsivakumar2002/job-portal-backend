@@ -18,6 +18,7 @@ db.connect((err) => {
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/jobs', require('./routes/jobRoutes'));
 
 app.get('/', (req, res) => {
   res.send('Job Portal API (MySQL) is running...');
