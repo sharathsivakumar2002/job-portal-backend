@@ -1,16 +1,36 @@
 const express = require('express');
 const router = express.Router();
-const { applyForJob, getMyApplications, getApplicantsForJob } = require('../controllers/applicationController');
-const { protect } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const applicationController = require('../controllers/applicationController');
+const authenticate = require('../middleware/authMiddleware');
+const upload = require('../middleware/upload'); // Middleware for handling resume file uploads
 
-// Candidate applies for a job
-router.post('/apply/:jobId', protect, upload.single('resume'), applyForJob);
+// Candidate: Apply to a job
+router.post(
+  '/apply',
+  authenticate,
+  upload.single('resume'),
+  applicationController.applyToJob
+);
 
-// Candidate views own applications
-router.get('/my-applications', protect, getMyApplications);
+// Candidate: View their own applications
+router.get(
+  '/my-applications',
+  authenticate,
+  applicationController.getCandidateApplications
+);
 
-// Recruiter views applicants for a job
-router.get('/job/:jobId/applicants', protect, getApplicantsForJob);
+// Recruiter: View applicants for a specific job
+router.get(
+  '/job/:jobId',
+  authenticate,
+  applicationController.getJobApplicants
+);
+
+// Recruiter: Update the status of a job application
+router.put(
+  '/status/:appId',
+  authenticate,
+  applicationController.updateStatus
+);
 
 module.exports = router;
