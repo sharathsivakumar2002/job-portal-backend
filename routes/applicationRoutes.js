@@ -1,36 +1,40 @@
+// backend/routes/applicationRoutes.js
 const express = require('express');
 const router = express.Router();
+
 const applicationController = require('../controllers/applicationController');
-const authenticate = require('../middleware/authMiddleware');
-const upload = require('../middleware/upload'); // Middleware for handling resume file uploads
+const { protect, isRecruiter } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware'); // multer instance
 
-// Candidate: Apply to a job
+// Candidate: Apply to a job (upload resume)
+// POST /api/applications/apply/:jobId
 router.post(
-  '/apply',
-  authenticate,
-  upload.single('resume'),
-  applicationController.applyToJob
+  '/apply/:jobId',
+  protect,
+  upload.single('resume'),        // form-data key: 'resume' (file)
+  applicationController.applyForJob
 );
 
-// Candidate: View their own applications
+// Candidate: View own applications
+// GET /api/applications/my-applications
+router.get('/my-applications', protect, applicationController.getMyApplications);
+
+// Recruiter: View applicants for a job
+// GET /api/applications/job/:jobId/applicants
 router.get(
-  '/my-applications',
-  authenticate,
-  applicationController.getCandidateApplications
+  '/job/:jobId/applicants',
+  protect,
+  isRecruiter,
+  applicationController.getApplicantsForJob
 );
 
-// Recruiter: View applicants for a specific job
-router.get(
-  '/job/:jobId',
-  authenticate,
-  applicationController.getJobApplicants
-);
-
-// Recruiter: Update the status of a job application
+// Recruiter: Update application status
+// PUT /api/applications/:applicationId/status
 router.put(
-  '/status/:appId',
-  authenticate,
-  applicationController.updateStatus
+  '/:applicationId/status',
+  protect,
+  isRecruiter,
+  applicationController.updateApplicationStatus
 );
 
 module.exports = router;

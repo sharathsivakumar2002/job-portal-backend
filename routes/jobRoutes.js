@@ -1,15 +1,23 @@
+// backend/routes/jobRoutes.js
 const express = require('express');
 const router = express.Router();
-const { addJob, getAllJobs, getJobById } = require('../controllers/jobController');
-const { protect } = require('../middleware/authMiddleware');
 
-// Recruiter creates job
-router.post('/add', protect, addJob);
+const jobController = require('../controllers/jobController');
+const { protect, isRecruiter } = require('../middleware/authMiddleware');
 
-// Get all jobs
-router.get('/', getAllJobs);
+// Create a new job (Recruiter only)
+router.post('/', protect, isRecruiter, jobController.createJob);
 
-// Get single job by ID
-router.get('/:id', getJobById);
+// Get all jobs (Public)
+router.get('/', jobController.getAllJobs);
+
+// Get a job by ID (Public)
+router.get('/:jobId', jobController.getJobById);
+
+// Update a job (Recruiter only)
+router.put('/:jobId', protect, isRecruiter, jobController.updateJob);
+
+// Delete a job (Recruiter only)
+router.delete('/:jobId', protect, isRecruiter, jobController.deleteJob);
 
 module.exports = router;
